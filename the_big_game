@@ -7,6 +7,7 @@ import time
 
 
 
+
 # Starting the mixer
 mixer.init()
 
@@ -79,15 +80,6 @@ class Game():
             sprites[-1].dx = dx
             sprites[-1].dy = dy
 
-        # Add powerups
-        for _ in range(self.level):
-            x = random.randint(-self.width / 2, self.width / 2)
-            y = random.randint(-self.height / 2, self.height / 2)
-            dx = random.randint(-2, 2)
-            dy = random.randint(-2, -2)
-            sprites.append(Powerup(x, y, "circle", "#7083FF"))
-            sprites[-1].dx = dx
-            sprites[-1].dy = dy
 
     def render_border(self, pen, x_offset, y_offset):
         pen.color("white")
@@ -121,15 +113,14 @@ class Game():
         pen.goto(300, 400)
         pen.pendown()
         pen.goto(300, -400)
-
+        score1 = player.score
         pen.penup()
         pen.color("white")
         character_pen.scale = 1.0
         character_pen.draw_string(pen, "SPACE ARENA", 400, 270)
-        character_pen.draw_string(pen, "SCORE {}".format(score), 400, 240)
-        character_pen.draw_string(pen, "ENEMIES {}".format(active_enemies), 400, 210)
-        character_pen.draw_string(pen, "LIVES {}".format(player.lives), 400, 180)
-        character_pen.draw_string(pen, "LEVEL {}".format(game.level), 400, 150)
+        character_pen.draw_string(pen, "SCORE {}".format(score1), 400, 240)
+        character_pen.draw_string(pen, "LIVES {}".format(player.lives), 400, 210)
+        character_pen.draw_string(pen, "LEVEL {}".format(game.level), 400, 180)
         character_pen.draw_string(pen, "MINI MAP", 400, -80)
 
     def start(self):
@@ -392,6 +383,8 @@ class Sprite():
             pen.end_fill()
 
 
+
+
 class Player(Sprite):
     def __init__(self, x, y, shape, color):
         Sprite.__init__(self, 0, 0, shape, color)
@@ -605,17 +598,37 @@ class Enemy(Sprite):
         self.health = self.max_health
         self.type = random.choice(["hunter", "mine", "surveillance"])
 
+
         if self.type == "hunter":
             self.color = "red"
             self.shape = "square"
+            if enemy.health == 0:
+                wn.update()
+                player.score += 10
+                print(player.score)
+                score1 = player.score
+
+
 
         elif self.type == "mine":
             self.color = "#F4A261"
             self.shape = "square"
+            if enemy.health == 0:
+                wn.update()
+                player.score += 10
+                print(player.score)
+                score1 = player.score
+
+
 
         elif self.type == "surveillance":
             self.color = "#F08080"
             self.shape = "square"
+
+
+
+
+
 
     def update(self):
         if self.state == "active":
@@ -772,6 +785,8 @@ wn.onkeypress(game.start, "S")
 
 # Main Loop
 while True:
+
+
     # Splash
     if game.state == "splash":
         wn.update()
@@ -848,7 +863,7 @@ while True:
 
 
 
-    if player.lives == 2:
+    if player.lives == 0:
         mixer.music.pause()
         mixer.music.load("C:\\Users\\itama\\Downloads\\Retro Game Over Sound Effect.mp3")
         mixer.music.play()
@@ -863,9 +878,10 @@ while True:
         write.color('red')
         write.hideturtle()
         character_pen.scale = 4
-
         character_pen.draw_string(pen, "G", -100, 0)
         character_pen.draw_string(pen, "GAME OVER", 0, 0)
+        character_pen.scale = 1
+        character_pen.draw_string(pen, "SCORE {}".format(player.score), 0, -100)
 
         wn.reset()
         break
